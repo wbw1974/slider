@@ -60,7 +60,7 @@ fn process_args(args: &Vec<String>) -> (Option<usize>, Option<usize>) {
                     iterations = Some(res.unwrap());
                 }
             }
-            _ => ()
+            _ => (),
         }
         ptr = match_key(arg.trim(), "--seed", 1, "--iterations", 2);
     }
@@ -203,7 +203,7 @@ fn choose_two<R: Rng>(
     item_1: usize,
     item_2: usize,
 ) -> Option<usize> {
-    let val = rng.gen_range(0, 1);
+    let val = rng.gen_range(0, 2);
     match val {
         1 => {
             map[pointer] = map[item_1];
@@ -227,7 +227,7 @@ fn choose_three<R: Rng>(
     item_2: usize,
     item_3: usize,
 ) -> Option<usize> {
-    let val = rng.gen_range(0, 2);
+    let val = rng.gen_range(0, 3);
     match val {
         0 => {
             map[pointer] = map[item_1];
@@ -257,7 +257,7 @@ fn choose_four<R: Rng>(
     item_3: usize,
     item_4: usize,
 ) -> Option<usize> {
-    let val = rng.gen_range(0, 3);
+    let val = rng.gen_range(0, 4);
     match val {
         3 => {
             map[pointer] = map[item_1];
