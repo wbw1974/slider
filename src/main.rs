@@ -26,6 +26,7 @@ fn main() {
     print_map(&map);
     println!("Begin game.");
     begin_game(&mut map);
+    std::process::exit(0);
 }
 
 fn process_args(args: &Vec<String>) -> (Option<usize>, Option<usize>) {
@@ -302,12 +303,12 @@ fn begin_game(map: &mut Vec<Option<usize>>) {
             println!("Game won in {} moves.", moves);
             break;
         } else {
-            println!("Tile to move?");
+            println!("Tile to move (type 'quit' to quit)?");
             let mut move_to_make = String::new();
             io::stdin()
                 .read_line(&mut move_to_make)
                 .expect("Failed to read line.");
-            let tile = legalize_input(&move_to_make, map);
+            let tile = legalize_input(&move_to_make, map, &moves);
             match tile {
                 Some(tile) => {
                     move_tile(map, tile);
@@ -323,7 +324,16 @@ fn begin_game(map: &mut Vec<Option<usize>>) {
     }
 }
 
-fn legalize_input(input: &str, map: &Vec<Option<usize>>) -> Option<usize> {
+fn legalize_input(input: &str, map: &Vec<Option<usize>>, moves: &usize) -> Option<usize> {
+    if input.trim() == "quit" {
+        if *moves == 1 as usize {
+            println!("Quit after {} move.", moves);
+        } else {
+            println!("Quit after {} moves.", moves);
+        }
+        std::process::exit(0);
+    }
+
     let guess: Result<usize, ParseIntError> = input.trim().parse();
     match guess {
         Ok(val) => {
