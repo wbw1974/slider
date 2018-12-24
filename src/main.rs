@@ -2,6 +2,8 @@ extern crate rand;
 
 use rand::prelude::*;
 use std::env;
+use std::io;
+use std::num::ParseIntError;
 
 fn main() {
     let (seed, iterations) = process_args(&env::args().collect());
@@ -17,20 +19,13 @@ fn main() {
     }
 
     let mut map = make_map();
-    if check_win(&map) {
-        println!("Beginning map");
-    } else {
-        println!("Map shuffled");
-    }
+    println!("Beginning map.");
     print_map(&map);
     println!("Shuffle {} times.", iter);
     shuffle_map(seed, iter, &mut map);
-    if check_win(&map) {
-        println!("Beginning map");
-    } else {
-        println!("Map shuffled");
-        print_map(&map);
-    }
+    print_map(&map);
+    println!("Begin game.");
+    begin_game(&mut map);
 }
 
 fn process_args(args: &Vec<String>) -> (Option<usize>, Option<usize>) {
@@ -123,7 +118,6 @@ fn shuffle_map(seed: Option<usize>, iterations: usize, map: &mut Vec<Option<usiz
     let mut rng: rand::prelude::StdRng;
     match seed {
         Some(seed) => {
-            println!("seed: {}", seed);
             rng = StdRng::seed_from_u64(seed as u64);
         }
         None => {
@@ -191,7 +185,7 @@ fn choose_two<R: Rng>(
             move_tile(map, item_2);
             return item_2;
         }
-        _ => panic!("choose_two random number out of range: {}", val),
+        _ => panic!("Function choose_two random number out of range: {}.", val),
     }
 }
 
@@ -216,7 +210,7 @@ fn choose_three<R: Rng>(
             move_tile(map, item_3);
             return item_3;
         }
-        _ => panic!("choose_three random number out of range: {}", val),
+        _ => panic!("Function choose_three random number out of range: {}.", val),
     }
 }
 
@@ -246,7 +240,7 @@ fn choose_four<R: Rng>(
             move_tile(map, item_4);
             return item_4;
         }
-        _ => panic!("choose_four random number out of range: {}", val),
+        _ => panic!("Function choose_four random number out of range: {}.", val),
     }
 }
 
@@ -275,7 +269,7 @@ fn move_tile(map: &mut Vec<Option<usize>>, tile: usize) -> bool {
             return true;
         }
         _ => {
-            println!("Illegal move: {}", tile);
+            println!("Illegal move: {}.", tile);
             return false;
         }
     }
@@ -299,4 +293,61 @@ fn check_win(map: &Vec<Option<usize>>) -> bool {
         }
     }
     return true;
+}
+
+fn begin_game(map: &mut Vec<Option<usize>>) {
+    let mut moves = 0;
+    loop {
+        if check_win(&map) {
+            println!("Game won in {} moves.", moves);
+            break;
+        } else {
+            println!("Tile to move?");
+            let mut move_to_make = String::new();
+            io::stdin()
+                .read_line(&mut move_to_make)
+                .expect("Failed to read line.");
+            let tile = legalize_input(&move_to_make, map);
+            match tile {
+                Some(tile) => {
+                    move_tile(map, tile);
+                    moves += 1;
+                }
+                None => {
+                    println!("I do not understand your move.");
+                }
+            }
+            println!("Current game.");
+            print_map(&map);
+        }
+    }
+}
+
+fn legalize_input(input: &str, map: &Vec<Option<usize>>) -> Option<usize> {
+    let guess: Result<usize, ParseIntError> = input.trim().parse();
+    match guess {
+        Ok(val) => {
+            return translate_to_tile(val, map);
+        }
+        Err(val) => {
+            println!("{}.", val);
+            return None;
+        }
+    }
+}
+
+fn translate_to_tile(val: usize, map: &Vec<Option<usize>>) -> Option<usize> {
+    for x in 0..16 {
+        let tmp = map[x];
+        match tmp {
+            Some(tmp) => {
+                if tmp == val {
+                    return Some(x);
+                }
+            }
+            None => (),
+        }
+    }
+    println!("Could not find number {}.", val);
+    return None;
 }
